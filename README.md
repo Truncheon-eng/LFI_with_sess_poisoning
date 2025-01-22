@@ -39,6 +39,7 @@ while (strpos($param_value, '../') !== false) {
 ```shell
 docker-compose up
 ```
+- в браузере вбить http://localhost:port/index.php
 - в файле docker-compose.yaml можно поменять значение порта с 8090 на любой другой
 - в файле .env можно поменять значение флага на желаемое
 
